@@ -5,6 +5,7 @@ artifacts/release/
 artifacts/detection-debug/
 artifacts/dxf-validation/
 artifacts/installer/*
+artifacts/license-test/
 
 # Archived binaries are retained locally for manual deletion, not uploaded.
 artifacts/ARCHIVE_FOR_MANUAL_DELETE_20261107/installer-versions/
