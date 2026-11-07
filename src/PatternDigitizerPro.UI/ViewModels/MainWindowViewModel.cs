@@ -650,6 +650,7 @@ public sealed class MainWindowViewModel : ObservableObject
                 OnPropertyChanged(nameof(IsDeleteInternalPointActive));
                 OnPropertyChanged(nameof(IsSmartInternalLineActive));
                 OnPropertyChanged(nameof(IsAddInternalLineActive));
+                OnPropertyChanged(nameof(IsAddInternalCurveActive));
                 OnPropertyChanged(nameof(IsDeleteInternalLineActive));
                 OnPropertyChanged(nameof(IsMeasurePerimeterActive));
                 OnPropertyChanged(nameof(IsMeasureDirectActive));
@@ -670,6 +671,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public bool IsDeleteInternalPointActive => ActiveTool == GeminiToolMode.DeleteInternalPoint;
     public bool IsSmartInternalLineActive => ActiveTool == GeminiToolMode.SmartInternalLine;
     public bool IsAddInternalLineActive => ActiveTool == GeminiToolMode.AddInternalLine;
+    public bool IsAddInternalCurveActive => ActiveTool == GeminiToolMode.AddInternalCurve;
     public bool IsDeleteInternalLineActive => ActiveTool == GeminiToolMode.DeleteInternalLine;
     public bool IsMeasurePerimeterActive => ActiveTool == GeminiToolMode.MeasurePerimeter;
     public bool IsMeasureDirectActive => ActiveTool == GeminiToolMode.MeasureDirect;

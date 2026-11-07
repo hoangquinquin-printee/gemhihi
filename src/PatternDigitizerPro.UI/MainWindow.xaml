@@ -460,6 +460,14 @@
                             <controls:GeminiToolbarIcon Kind="AddInternalLine" Width="24" Height="24" />
                         </ToggleButton>
 
+                        <!-- Create internal curve: three clicks (start, control, end). -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsAddInternalCurveActive, Mode=OneWay}"
+                                      ToolTip="Create new internal curve"
+                                      Click="AddInternalCurve_Click">
+                            <controls:GeminiToolbarIcon Kind="AddInternalLine" Width="24" Height="24" />
+                        </ToggleButton>
+
                         <!-- 18. DeleteInternalLineTBItem (ImageIndex=30) -->
                         <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
                                       IsChecked="{Binding IsDeleteInternalLineActive, Mode=OneWay}"

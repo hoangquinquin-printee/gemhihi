@@ -1,5 +1,5 @@
 #define AppName "gemhihi"
-#define AppVersion "1.0.26"
+#define AppVersion "1.0.27"
 #define AppPublisher "gemhihi"
 #define AppExeName "gemhihi.exe"
 
@@ -21,7 +21,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#AppExeName}
 
 [Files]
-Source: "..\artifacts\release\gemhihi-1.0.26\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "*.pdb"
+Source: "..\artifacts\release\gemhihi-1.0.27\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "*.pdb"
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"

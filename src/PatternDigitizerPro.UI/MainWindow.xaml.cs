@@ -345,8 +345,8 @@ public partial class MainWindow : Window
             DrawPatternPieceOnCanvas(piece, ViewModel.GetCalibrationForPiece(piece), isSelectedPiece);
         }
 
-        // 5. Render two-click Internal Line rubber-band preview
-        if (ViewModel.ActiveTool == GeminiToolMode.AddInternalLine &&
+        // 5. Render Internal Line/Curve rubber-band preview
+        if ((ViewModel.ActiveTool is GeminiToolMode.AddInternalLine or GeminiToolMode.AddInternalCurve) &&
             _pendingInternalLineStartMm.HasValue &&
             _pendingInternalLineCurrentMousePx.HasValue)
         {
@@ -358,14 +358,28 @@ public partial class MainWindow : Window
                 : cal;
             ImagePixelPoint p0 = lineCalibration.PhysicalMmToPixel(_pendingInternalLineStartMm.Value);
             Point p1 = _pendingInternalLineCurrentMousePx.Value;
-            InteractiveVectorOverlayCanvas.Children.Add(new Line
+            if (ViewModel.ActiveTool == GeminiToolMode.AddInternalCurve && _pendingInternalCurveControlMm.HasValue)
             {
-                X1 = p0.X, Y1 = p0.Y, X2 = p1.X, Y2 = p1.Y,
-                Stroke = new SolidColorBrush(Color.FromRgb(255, 220, 0)),
-                StrokeThickness = OverlayPixels(2.0),
-                StrokeDashArray = OverlayDash(4, 2),
-                IsHitTestVisible = false
-            });
+                ImagePixelPoint pc = lineCalibration.PhysicalMmToPixel(_pendingInternalCurveControlMm.Value);
+                var geometry = new PathGeometry();
+                var figure = new PathFigure { StartPoint = new Point(p0.X, p0.Y) };
+                figure.Segments.Add(new QuadraticBezierSegment(new Point(pc.X, pc.Y), p1, true));
+                geometry.Figures.Add(figure);
+                InteractiveVectorOverlayCanvas.Children.Add(new System.Windows.Shapes.Path
+                {
+                    Data = geometry, Stroke = new SolidColorBrush(Color.FromRgb(255, 220, 0)),
+                    StrokeThickness = OverlayPixels(2.0), StrokeDashArray = OverlayDash(4, 2), IsHitTestVisible = false
+                });
+            }
+            else
+            {
+                InteractiveVectorOverlayCanvas.Children.Add(new Line
+                {
+                    X1 = p0.X, Y1 = p0.Y, X2 = p1.X, Y2 = p1.Y,
+                    Stroke = new SolidColorBrush(Color.FromRgb(255, 220, 0)),
+                    StrokeThickness = OverlayPixels(2.0), StrokeDashArray = OverlayDash(4, 2), IsHitTestVisible = false
+                });
+            }
         }
 
         // 6. Render interactive Measurement Overlay (Direct & Perimeter dimension lines + labels)
@@ -2205,7 +2219,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (ViewModel.ActiveTool == GeminiToolMode.AddInternalLine && _pendingInternalLineStartMm.HasValue)
+        if ((ViewModel.ActiveTool is GeminiToolMode.AddInternalLine or GeminiToolMode.AddInternalCurve) && _pendingInternalLineStartMm.HasValue)
         {
             _pendingInternalLineCurrentMousePx = curImgPos;
             RenderInteractiveVectorOverlay();
@@ -2988,8 +3002,15 @@ public partial class MainWindow : Window
 
     private void AddInternalCurve_Click(object sender, RoutedEventArgs e)
     {
+        EnsureInteractiveWorkspaceReadyForTool();
+        _pendingInternalLineStartMm = null;
+        _pendingInternalCurveControlMm = null;
+        _pendingInternalLineCurrentMousePx = null;
+        _pendingInternalLinePiece = null;
         ViewModel.ActiveTool = GeminiToolMode.AddInternalCurve;
+        ViewModel.ActivePropertiesDockMode = PropertiesDockMode.InternalLine;
         ViewModel.StatusLeftText = "Create internal curve: click start, control point, then end point. Esc cancels.";
+        RenderInteractiveVectorOverlay();
     }
 
     private void DeleteInternalLine_Click(object sender, RoutedEventArgs e)
