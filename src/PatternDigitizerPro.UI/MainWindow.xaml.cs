@@ -805,7 +805,11 @@ public partial class MainWindow : Window
 
         contourPath.MouseLeftButtonDown += (s, ev) =>
         {
-            Point clickPos = ev.GetPosition(RealImageCanvas);
+            // Resolve the click in the same unscaled canvas that owns the
+            // contour geometry.  Using the image canvas as the target can
+            // apply a second LayoutTransform conversion when the viewport is
+            // zoomed, which makes internal-line clicks land at another point.
+            Point clickPos = ev.GetPosition(InteractiveVectorOverlayCanvas);
             PhysicalPointMm clickMm = cal.PixelToPhysicalMm(new ImagePixelPoint(clickPos.X, clickPos.Y));
             if (ev.ClickCount == 2 && TryAddPointOnContourDoubleClick(piece, clickMm, clickPos))
             {
@@ -2497,7 +2501,7 @@ public partial class MainWindow : Window
     {
         if (ViewModel.ActiveTool is GeminiToolMode.AddInternalLine or GeminiToolMode.AddInternalCurve or GeminiToolMode.AddInternalPoint)
         {
-            Point clickPos = e.GetPosition(RealImageCanvas);
+            Point clickPos = e.GetPosition(InteractiveVectorOverlayCanvas);
             // The canvas may receive a click through a transparent overlay
             // instead of the contour Path. Resolve each candidate in its own
             // calibration; ActiveCalibration is not valid for independently
