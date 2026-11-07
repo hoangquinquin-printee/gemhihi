@@ -1,0 +1,265 @@
+<Window x:Class="PatternDigitizerPro.UI.Views.CalibrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:PatternDigitizerPro.UI.Controls"
+        Title="Gemini PhotoDigitizer calibration"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F0F0F0"
+        FontFamily="Tahoma, MS Sans Serif"
+        FontSize="11"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+    <Grid Width="992" Height="673" Background="#F0F0F0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="783" />
+            <ColumnDefinition Width="209" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left GridImage Area (783 x 673) -->
+        <DockPanel Grid.Column="0" Background="#F0F0F0">
+            <!-- Top Toolbar Dock (Height=36, matches Ảnh 5) -->
+            <Border DockPanel.Dock="Top"
+                    Height="36"
+                    Background="#F0F0F0"
+                    BorderBrush="#D0D0D0"
+                    BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,0,0">
+                    <!-- Load picture split button (Image + Text + Arrow) -->
+                    <Button x:Name="LoadPictureBtn"
+                            Height="30"
+                            Width="94"
+                            Padding="3,1"
+                            Style="{StaticResource GeminiToolbarButtonStyle}"
+                            ToolTip="Load picture (Ctrl+O)"
+                            Click="LoadPictureBtn_Click">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <controls:GeminiToolbarIcon Kind="LoadPicture" Width="22" Height="22" Margin="0,0,5,0" />
+                            <TextBlock Text="Load picture" VerticalAlignment="Center" Foreground="#000000" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="LoadPictureDropBtn"
+                            Height="30"
+                            Width="12"
+                            Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                            Click="LoadPictureDropBtn_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu x:Name="LoadPicMenu">
+                                <MenuItem Header="Capture picture" Click="UnimplementedAcquire_Click">
+                                    <MenuItem.Icon>
+                                        <controls:GeminiToolbarIcon Kind="CapturePicture" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Load picture" InputGestureText="Ctrl+O" Click="LoadPictureBtn_Click">
+                                    <MenuItem.Icon>
+                                        <controls:GeminiToolbarIcon Kind="LoadPicture" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Scan picture" Click="UnimplementedAcquire_Click">
+                                    <MenuItem.Icon>
+                                        <controls:GeminiToolbarIcon Kind="ScanPicture" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="Load Demo Calibration Grid (State B)" Click="LoadDemoGridMenuItem_Click" />
+                                <MenuItem Header="Clear Calibration Image (State A)" Click="ClearGridMenuItem_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+
+                    <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" Height="28" Margin="3,2" />
+
+                    <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                            Width="28" Height="30"
+                            ToolTip="Zoom in"
+                            Click="ZoomInBtn_Click">
+                        <controls:GeminiToolbarIcon Kind="ZoomIn" Width="20" Height="20" />
+                    </Button>
+                    <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                            Width="28" Height="30"
+                            ToolTip="Zoom out"
+                            Click="ZoomOutBtn_Click">
+                        <controls:GeminiToolbarIcon Kind="ZoomOut" Width="20" Height="20" />
+                    </Button>
+
+                    <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" Height="28" Margin="3,2" />
+
+                    <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                            Width="28" Height="30"
+                            ToolTip="Zoom to width"
+                            Click="ZoomFitBtn_Click">
+                        <controls:GeminiToolbarIcon Kind="ZoomArea" Width="20" Height="20" />
+                    </Button>
+                    <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                            Width="28" Height="30"
+                            ToolTip="Zoom to all"
+                            Click="ZoomFitBtn_Click">
+                        <controls:GeminiToolbarIcon Kind="ZoomSelected" Width="20" Height="20" />
+                    </Button>
+
+                    <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" Height="32" Margin="3,1" />
+                </StackPanel>
+            </Border>
+
+            <!-- GridImage Scrollable Canvas -->
+            <Border Background="#FFFFFF" BorderBrush="#A0A0A0" BorderThickness="0,0,1,0">
+                <ScrollViewer x:Name="GridScrollViewer"
+                              HorizontalScrollBarVisibility="Visible"
+                              VerticalScrollBarVisibility="Visible"
+                              Background="#FFFFFF"
+                              PreviewMouseWheel="GridScrollViewer_PreviewMouseWheel"
+                              MouseDown="GridScrollViewer_MouseDown"
+                              MouseMove="GridScrollViewer_MouseMove"
+                              MouseUp="GridScrollViewer_MouseUp">
+                    <Grid x:Name="GridImageContainer" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FFFFFF">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform x:Name="GridScaleTransform" ScaleX="1.0" ScaleY="1.0" />
+                        </Grid.LayoutTransform>
+                        <Image x:Name="CalibrationImageControl"
+                               Stretch="None"
+                               Visibility="Collapsed"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                        <Canvas x:Name="CalibrationOverlayCanvas"
+                                Visibility="Collapsed"
+                                Background="Transparent" />
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+        </DockPanel>
+
+        <!-- Right MainPanel (Width=209, Height=673) -->
+        <Grid Grid.Column="1" Background="#F0F0F0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="648" />
+                <RowDefinition Height="25" />
+            </Grid.RowDefinitions>
+
+            <!-- ParamPanel (209 x 648) -->
+            <Canvas Grid.Row="0" Width="209" Height="648">
+                <!-- Cell width -->
+                <TextBlock Canvas.Left="8" Canvas.Top="12" Text="Cell width:" />
+                <TextBox x:Name="SquareXBox"
+                         Canvas.Left="120" Canvas.Top="8" Width="57" Height="21"
+                         Text="5"
+                         Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                <TextBlock Canvas.Left="181" Canvas.Top="12" Text="cm" />
+
+                <!-- Cell height -->
+                <TextBlock Canvas.Left="8" Canvas.Top="36" Text="Cell height:" />
+                <TextBox x:Name="SquareYBox"
+                         Canvas.Left="120" Canvas.Top="32" Width="57" Height="21"
+                         Text="5"
+                         Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                <TextBlock Canvas.Left="181" Canvas.Top="36" Text="cm" />
+
+                <!-- GroupBox Croping box (Exact spelling from TCalibrationFrm DFM: "Croping box") -->
+                <GroupBox Header="Croping box"
+                          Canvas.Left="8" Canvas.Top="64"
+                          Width="193" Height="129"
+                          BorderBrush="#D0D0D0"
+                          Foreground="#000000">
+                    <Canvas>
+                        <!-- Start X + UpDown1 -->
+                        <TextBlock Canvas.Left="6" Canvas.Top="10" Text="Start X :" />
+                        <TextBox x:Name="StartXBox"
+                                 Canvas.Left="104" Canvas.Top="6" Width="57" Height="21"
+                                 Text="0"
+                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                        <StackPanel Canvas.Left="161" Canvas.Top="6" Width="16" Height="21">
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StartXUp_Click">
+                                <Polygon Points="0,3 6,3 3,0" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StartXDown_Click">
+                                <Polygon Points="0,0 6,0 3,3" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Start Y + UpDown2 -->
+                        <TextBlock Canvas.Left="6" Canvas.Top="34" Text="Start Y :" />
+                        <TextBox x:Name="StartYBox"
+                                 Canvas.Left="104" Canvas.Top="30" Width="57" Height="21"
+                                 Text="0"
+                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                        <StackPanel Canvas.Left="161" Canvas.Top="30" Width="16" Height="21">
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StartYUp_Click">
+                                <Polygon Points="0,3 6,3 3,0" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StartYDown_Click">
+                                <Polygon Points="0,0 6,0 3,3" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Stop X + UpDown3 -->
+                        <TextBlock Canvas.Left="6" Canvas.Top="58" Text="Stop X :" />
+                        <TextBox x:Name="StopXBox"
+                                 Canvas.Left="104" Canvas.Top="54" Width="57" Height="21"
+                                 Text="0"
+                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                        <StackPanel Canvas.Left="161" Canvas.Top="54" Width="16" Height="21">
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StopXUp_Click">
+                                <Polygon Points="0,3 6,3 3,0" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StopXDown_Click">
+                                <Polygon Points="0,0 6,0 3,3" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Stop Y + UpDown4 -->
+                        <TextBlock Canvas.Left="6" Canvas.Top="82" Text="Stop Y :" />
+                        <TextBox x:Name="StopYBox"
+                                 Canvas.Left="104" Canvas.Top="78" Width="57" Height="21"
+                                 Text="0"
+                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                        <StackPanel Canvas.Left="161" Canvas.Top="78" Width="16" Height="21">
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StopYUp_Click">
+                                <Polygon Points="0,3 6,3 3,0" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Height="10.5" Padding="0" Style="{StaticResource GeminiClassicButtonStyle}" Click="StopYDown_Click">
+                                <Polygon Points="0,0 6,0 3,3" Fill="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+                    </Canvas>
+                </GroupBox>
+
+                <!-- Active area width / height (Left=8, Top=556 & 580) -->
+                <TextBlock x:Name="ActiveWidthLabel" Canvas.Left="8" Canvas.Top="556" Text="Active area width:" />
+                <TextBox x:Name="ActiveWidthBox"
+                         Canvas.Left="112" Canvas.Top="552" Width="57" Height="21"
+                         Text="" IsEnabled="False"
+                         Background="#F0F0F0"
+                         Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                <TextBlock x:Name="ActiveWidthUnit" Canvas.Left="176" Canvas.Top="556" Text="cm" />
+
+                <TextBlock x:Name="ActiveHeightLabel" Canvas.Left="8" Canvas.Top="580" Text="Active area height:" />
+                <TextBox x:Name="ActiveHeightBox"
+                         Canvas.Left="112" Canvas.Top="576" Width="57" Height="21"
+                         Text="" IsEnabled="False"
+                         Background="#F0F0F0"
+                         Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                <TextBlock x:Name="ActiveHeightUnit" Canvas.Left="176" Canvas.Top="580" Text="cm" />
+
+                <!-- Calibrate & Close Buttons (Left=80 & 144, Top=616, 59x25) -->
+                <Button x:Name="CalibrateBtn"
+                        Canvas.Left="80" Canvas.Top="616"
+                        Width="59" Height="25"
+                        Content="Calibrate"
+                        Style="{StaticResource GeminiClassicButtonStyle}"
+                        Click="CalibrateBtn_Click" />
+                <Button x:Name="CloseBtn"
+                        Canvas.Left="144" Canvas.Top="616"
+                        Width="59" Height="25"
+                        Content="Close"
+                        IsCancel="True"
+                        Style="{StaticResource GeminiClassicButtonStyle}"
+                        Click="CloseBtn_Click" />
+            </Canvas>
+
+            <!-- Bottom ProgressBarPanel (209 x 25, Top=648, matches TCalibrationFrm DFM & Ảnh 5) -->
+            <Border Grid.Row="1"
+                    Background="#F0F0F0"
+                    BorderBrush="#D0D0D0"
+                    BorderThickness="0,1,0,0" />
+        </Grid>
+    </Grid>
+</Window>

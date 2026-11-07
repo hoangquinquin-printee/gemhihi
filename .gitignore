@@ -1,0 +1,22 @@
+# Build and transient output
+**/bin/
+**/obj/
+artifacts/release/
+artifacts/detection-debug/
+artifacts/dxf-validation/
+artifacts/installer/*
+
+# Archived binaries are retained locally for manual deletion, not uploaded.
+artifacts/ARCHIVE_FOR_MANUAL_DELETE_20261107/installer-versions/
+artifacts/ARCHIVE_FOR_MANUAL_DELETE_20261107/release-versions/
+
+# Secrets and customer-specific license material
+**/*.hphoto-license
+**/private*.pem
+**/*private-key*
+**/.env*
+
+# IDE/user state
+.vs/
+*.user
+*.suo

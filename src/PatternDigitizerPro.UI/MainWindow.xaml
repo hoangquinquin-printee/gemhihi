@@ -1,0 +1,1205 @@
+<Window x:Class="PatternDigitizerPro.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:PatternDigitizerPro.UI.Controls"
+        xmlns:vm="clr-namespace:PatternDigitizerPro.UI.ViewModels"
+        Title="{Binding WindowTitle}"
+        Width="1024"
+        Height="742"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource GeminiBtnFaceBrush}"
+        FontFamily="Tahoma, MS Sans Serif"
+        FontSize="11"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Style for ObjectPropertiesPanel TEdit boxes: #9B9B9B when Nothing Selected, #FFFFFF when Piece Selected -->
+        <Style x:Key="GeminiObjectPropertyEditStyle" TargetType="TextBox" BasedOn="{StaticResource GeminiClassicTextBoxStyle}">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="#A0A0A0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPieceSelected}" Value="False">
+                    <Setter Property="Background" Value="#9B9B9B" />
+                    <Setter Property="BorderBrush" Value="#9B9B9B" />
+                    <Setter Property="IsReadOnly" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Background="{StaticResource GeminiBtnFaceBrush}">
+
+        <!-- =================================================================== -->
+        <!-- 1. TOP DOCK: MENU BAR (Height=23) + MAIN TOOLBAR (Height=34)        -->
+        <!-- =================================================================== -->
+        <StackPanel DockPanel.Dock="Top" Background="{StaticResource GeminiBtnFaceBrush}">
+
+            <!-- Row 0: MainMenuTB (Height=23) -->
+            <Border Height="23"
+                    Background="{StaticResource GeminiBtnFaceBrush}"
+                    BorderBrush="#A0A0A0"
+                    BorderThickness="0,0,0,1">
+                <Menu Background="Transparent"
+                      VerticalAlignment="Center"
+                      FontFamily="Tahoma, MS Sans Serif"
+                      FontSize="11"
+                      Padding="2,0,0,0">
+
+                    <!-- FILE MENU -->
+                    <MenuItem Header="File" Padding="6,2">
+                        <MenuItem Header="Capture picture" Click="UnimplementedAcquire_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="CapturePicture" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Load picture" InputGestureText="Ctrl+O" Click="LoadPicture_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="LoadPicture" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Scan picture" Click="UnimplementedAcquire_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ScanPicture" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Reload" x:Name="ReloadSubMenu">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="LoadPicture" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="D:\pictures\03172025 111128.jpg (v9.0 Reference)" Click="ReloadReferenceRecent_Click" />
+                            <MenuItem Header="D:\LOREDANA\foto digi\fotografii\Traian\Picture1.jpg (4-Piece Points Demo)" Click="ReloadReferenceRecent_Click" />
+                            <MenuItem Header="D:\pictures\01232026 093723.jpg" Click="ReloadRealSample1_Click" />
+                            <MenuItem Header="D:\pictures\01082026 091623.jpg" Click="ReloadRealSample2_Click" />
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Draw digitize frame" Click="DrawDigitizeFrame_Click" />
+                        <MenuItem Header="Enter digitize-frame dimensions" Click="EnterDigitizeFrameDimensions_Click" />
+                        <MenuItem Header="Clear digitize frame" Click="ClearDigitizeFrame_Click" />
+                        <MenuItem Header="Detect pieces" Click="DetectPieces_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="DetectPieces" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Save" InputGestureText="Ctrl+S" Click="SaveGem_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="Save" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Save as ..." Click="SaveGem_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="Save" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Export">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="Save" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Export DXF..." Click="ExportDxf_Click" />
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Exit" Click="Exit_Click">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="Exit" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+
+                    <!-- MODIFY MENU -->
+                    <MenuItem Header="Modify" Padding="6,2">
+                        <MenuItem Header="Points">
+                            <MenuItem Header="Add point" Click="AddPoint_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="AddPoint" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Delete points" Click="DeletePoint_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="DeletePoint" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Corners">
+                            <MenuItem Header="Detect corner" Click="SmartCorner_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="SmartCorner" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Delete corner" Click="DeleteCorner_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="DeleteCorner" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Transform line to curve" Click="LineToCurve_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="LineToCurve" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Transform curve to line" Click="CurveToLine_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="CurveToLine" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Notches">
+                            <MenuItem Header="Detect notch" Click="SmartNotch_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="SmartNotch" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Create notch" Click="AddNotch_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="AddNotch" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Delete notch" Click="DeleteNotch_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="DeleteNotch" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Internal points">
+                            <MenuItem Header="Detect internal point" Click="SmartInternalPoint_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="SmartInternalPoint" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Create internal point" Click="AddInternalPoint_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="AddInternalPoint" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Delete internal point" Click="DeleteInternalPoint_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="DeleteInternalPoint" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Internal lines">
+                            <MenuItem Header="Detect internal line" Click="SmartInternalLine_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="SmartInternalLine" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Create internal line" Click="AddInternalLine_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="AddInternalLine" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Create internal curve" Click="AddInternalCurve_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="AddInternalLine" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Delete internal line" Click="DeleteInternalLine_Click">
+                                <MenuItem.Icon>
+                                    <controls:GeminiToolbarIcon Kind="DeleteInternalLine" Width="16" Height="16" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                    </MenuItem>
+
+                    <!-- VIEW MENU -->
+                    <MenuItem Header="View" Padding="6,2">
+                        <MenuItem Header="Show grid" InputGestureText="Alt+G" IsCheckable="True" IsChecked="{Binding ShowGrid}">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ShowGrid" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Show picture" InputGestureText="Alt+H" IsCheckable="True" IsChecked="{Binding ShowPicture}">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ShowPicture" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Show notches" InputGestureText="Alt+N" IsCheckable="True" IsChecked="{Binding ShowNotches}">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ShowNotches" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Show internal lines" InputGestureText="Alt+L" IsCheckable="True" IsChecked="{Binding ShowInternalLines}">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ShowInternalLines" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Show internal points" InputGestureText="Alt+P" IsCheckable="True" IsChecked="{Binding ShowInternalPoints}">
+                            <MenuItem.Icon>
+                                <controls:GeminiToolbarIcon Kind="ShowInternalPoints" Width="16" Height="16" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+
+                    <!-- SETTINGS MENU (Direct command in Gemini) -->
+                    <MenuItem Header="Settings" Padding="6,2" Click="OpenSettings_Click" />
+
+                    <!-- HELP MENU -->
+                    <MenuItem Header="Help" Padding="6,2">
+                        <MenuItem Header="Help" Click="OpenHelp_Click" />
+                        <MenuItem Header="Index help" Click="OpenHelp_Click" />
+                        <MenuItem Header="What is this ?" InputGestureText="Shift+F1" Click="WhatIsThis_Click" />
+                        <MenuItem Header="About..." Click="OpenAbout_Click" />
+                        <MenuItem Header="Register product" Click="OpenRegister_Click" />
+                        <Separator />
+                        <MenuItem Header="Phase 1 UI Inspector: Live v9.0 3-Piece State (Ảnh 1-5)" Click="ReloadLiveV9Reference_Click" />
+                        <MenuItem Header="Phase 1 UI Inspector: Manual 4-Piece Points Dock State" Click="ReloadDemoReference_Click" />
+                        <MenuItem Header="Phase 1 UI Inspector: Open Camera Calibration Dialog" Click="OpenCalibration_Click" />
+                    </MenuItem>
+                </Menu>
+            </Border>
+
+            <!-- Row 1: TBDock1 + MainTB (Height=34, exact v9.0 toolbar order matching Ảnh 1-2) -->
+            <Border Height="34"
+                    Background="{StaticResource GeminiBtnFaceBrush}"
+                    BorderBrush="#A0A0A0"
+                    BorderThickness="0,0,0,1">
+                <Border HorizontalAlignment="Left"
+                        BorderBrush="#A0A0A0"
+                        BorderThickness="0,0,1,0"
+                        Padding="2,0,4,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <!-- 1. FotoTBItem (Load picture + dropdown, ImageIndex=1) -->
+                        <Button x:Name="ToolbarLoadBtn"
+                                Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Load picture (Ctrl+O)"
+                                Click="LoadPicture_Click">
+                            <controls:GeminiToolbarIcon Kind="LoadPicture" Width="24" Height="24" />
+                        </Button>
+                        <Button x:Name="ToolbarLoadDropBtn"
+                                Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Load picture options"
+                                Click="ToolbarLoadDropBtn_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Capture picture" Click="UnimplementedAcquire_Click">
+                                        <MenuItem.Icon>
+                                            <controls:GeminiToolbarIcon Kind="CapturePicture" Width="16" Height="16" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Load picture" InputGestureText="Ctrl+O" Click="LoadPicture_Click">
+                                        <MenuItem.Icon>
+                                            <controls:GeminiToolbarIcon Kind="LoadPicture" Width="16" Height="16" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Scan picture" Click="UnimplementedAcquire_Click">
+                                        <MenuItem.Icon>
+                                            <controls:GeminiToolbarIcon Kind="ScanPicture" Width="16" Height="16" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Reload">
+                                        <MenuItem Header="D:\pictures\03172025 111128.jpg" Click="ReloadReferenceRecent_Click" />
+                                        <MenuItem Header="D:\LOREDANA\foto digi\fotografii\Traian\Picture1.jpg" Click="ReloadReferenceRecent_Click" />
+                                        <MenuItem Header="D:\pictures\01232026 093723.jpg" Click="ReloadRealSample1_Click" />
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+
+                        <!-- 2. SnakeTBItem (Detect piece contur, ImageIndex=17) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Detect piece contur"
+                                Click="DetectPieces_Click">
+                            <controls:GeminiToolbarIcon Kind="DetectPieces" Width="24" Height="24" />
+                        </Button>
+
+                        <!-- 3. SaveTBItem (Save + Export dropdown, ImageIndex=21) -->
+                        <Button x:Name="ToolbarSaveBtn"
+                                Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Save (Ctrl+S)"
+                                Click="SaveGem_Click">
+                            <controls:GeminiToolbarIcon Kind="Save" Width="24" Height="24" />
+                        </Button>
+                        <Button x:Name="ToolbarSaveDropBtn"
+                                Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Save / Export"
+                                Click="ToolbarSaveDropBtn_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Save" InputGestureText="Ctrl+S" Click="SaveGem_Click" />
+                                    <Separator />
+                                    <MenuItem Header="Export DXF..." Click="ExportDxf_Click" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+
+                        <!-- TBSeparatorItem1 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 4. UndoTBItem (ImageIndex=23, disabled monochrome grey in Ảnh 1-2) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Undo"
+                                Click="Undo_Click">
+                            <controls:GeminiToolbarIcon Kind="Undo" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </Button>
+                        <Button Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Undo history"
+                                Click="Undo_Click" />
+
+                        <!-- 5. RedoTBItem (ImageIndex=22, disabled monochrome grey) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Redo"
+                                Click="Redo_Click">
+                            <controls:GeminiToolbarIcon Kind="Redo" Width="24" Height="24" IsDisabledLook="True" />
+                        </Button>
+                        <Button Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Redo history"
+                                Click="Redo_Click" />
+
+                        <!-- TBSeparatorItem2 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 6. ZoomModeTBItem (Zoom to the selected area, ImageIndex=10) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsZoomAreaToolActive, Mode=OneWay}"
+                                      ToolTip="Zoom to the selected area"
+                                      Click="ZoomAreaTool_Click">
+                            <controls:GeminiToolbarIcon Kind="ZoomArea" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 7. ZoomToSelectedTBItem (F4, ImageIndex=24) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Zoom to selected pieces (F4)"
+                                Click="ZoomToSelected_Click">
+                            <controls:GeminiToolbarIcon Kind="ZoomSelected" Width="24" Height="24" />
+                        </Button>
+
+                        <!-- 8. ZoomToAllTBItem (F5, ImageIndex=12) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Zoom to entire picture (F5)"
+                                Click="ZoomToAll_Click">
+                            <controls:GeminiToolbarIcon Kind="ZoomAll" Width="24" Height="24" />
+                        </Button>
+
+                        <!-- TBSeparatorItem3 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 9. TBItem6 (Line2Curve, ImageIndex=5, disabled look) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsLineToCurveActive, Mode=OneWay}"
+                                      ToolTip="Transform line to curve"
+                                      Click="LineToCurve_Click">
+                            <controls:GeminiToolbarIcon Kind="LineToCurve" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </ToggleButton>
+
+                        <!-- 10. TBItem5 (Curve2Line, ImageIndex=6, disabled look) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsCurveToLineActive, Mode=OneWay}"
+                                      ToolTip="Transform curve to line"
+                                      Click="CurveToLine_Click">
+                            <controls:GeminiToolbarIcon Kind="CurveToLine" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </ToggleButton>
+
+                        <!-- TBSeparatorItem11 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 11. AddNotchTBItem (ImageIndex=8) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsAddNotchActive, Mode=OneWay}"
+                                      ToolTip="Create new notch"
+                                      Click="AddNotch_Click">
+                            <controls:GeminiToolbarIcon Kind="AddNotch" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 12. DeleteNotchTBItem (ImageIndex=9) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsDeleteNotchActive, Mode=OneWay}"
+                                      ToolTip="Delete selected notch"
+                                      Click="DeleteNotch_Click">
+                            <controls:GeminiToolbarIcon Kind="DeleteNotch" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- TBSeparatorItem12 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 13. SmartInternalPointTBItem (ImageIndex=25) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsSmartInternalPointActive, Mode=OneWay}"
+                                      ToolTip="Detect internal point in the selected area"
+                                      Click="SmartInternalPoint_Click">
+                            <controls:GeminiToolbarIcon Kind="SmartInternalPoint" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 14. AddInternalPointTBItem (ImageIndex=26) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsAddInternalPointActive, Mode=OneWay}"
+                                      ToolTip="Create new internal point"
+                                      Click="AddInternalPoint_Click">
+                            <controls:GeminiToolbarIcon Kind="AddInternalPoint" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 15. DeleteInternalPointTBItem (ImageIndex=27) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsDeleteInternalPointActive, Mode=OneWay}"
+                                      ToolTip="Delete selected internal point"
+                                      Click="DeleteInternalPoint_Click">
+                            <controls:GeminiToolbarIcon Kind="DeleteInternalPoint" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- TBSeparatorItem13 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 16. SmartInternalLineTBItem (ImageIndex=28) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsSmartInternalLineActive, Mode=OneWay}"
+                                      ToolTip="Detect internal line for the selected piece (for all pieces if none selected)"
+                                      Click="SmartInternalLine_Click">
+                            <controls:GeminiToolbarIcon Kind="SmartInternalLine" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 17. AddInternalLineTBItem (ImageIndex=29) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsAddInternalLineActive, Mode=OneWay}"
+                                      ToolTip="Create new internal line"
+                                      Click="AddInternalLine_Click">
+                            <controls:GeminiToolbarIcon Kind="AddInternalLine" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 18. DeleteInternalLineTBItem (ImageIndex=30) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsDeleteInternalLineActive, Mode=OneWay}"
+                                      ToolTip="Delete selected internal line"
+                                      Click="DeleteInternalLine_Click">
+                            <controls:GeminiToolbarIcon Kind="DeleteInternalLine" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- TBSeparatorItem14 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 19. TBItem10 (AddFigAux, ImageIndex=50, disabled when no piece selected) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Add auxiliary piece"
+                                Click="AddAuxPiece_Click">
+                            <controls:GeminiToolbarIcon Kind="AddAuxPiece" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </Button>
+
+                        <!-- 20. TBItem9 (DelFigAux, ImageIndex=49, disabled when no piece selected) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Delete auxiliary piece"
+                                Click="DeleteAuxPiece_Click">
+                            <controls:GeminiToolbarIcon Kind="DeleteAuxPiece" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </Button>
+
+                        <!-- 21. ShowTBItem (Show grid toggle + dropdown, ImageIndex=13) -->
+                        <ToggleButton x:Name="ToolbarShowGridBtn"
+                                      Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding ShowGrid}"
+                                      ToolTip="Show grid (Alt+G)">
+                            <controls:GeminiToolbarIcon Kind="ShowGrid" Width="24" Height="24" />
+                        </ToggleButton>
+                        <Button x:Name="ToolbarShowDropBtn"
+                                Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Show / Hide layers"
+                                Click="ToolbarShowDropBtn_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Show grid" InputGestureText="Alt+G" IsCheckable="True" IsChecked="{Binding ShowGrid}" />
+                                    <MenuItem Header="Show picture" InputGestureText="Alt+H" IsCheckable="True" IsChecked="{Binding ShowPicture}" />
+                                    <MenuItem Header="Show notches" InputGestureText="Alt+N" IsCheckable="True" IsChecked="{Binding ShowNotches}" />
+                                    <MenuItem Header="Show internal lines" InputGestureText="Alt+L" IsCheckable="True" IsChecked="{Binding ShowInternalLines}" />
+                                    <MenuItem Header="Show internal points" InputGestureText="Alt+P" IsCheckable="True" IsChecked="{Binding ShowInternalPoints}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+
+                        <!-- TBSeparatorItem8 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 22. ComputePerimeterDistanceTBItem (ImageIndex=33) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsMeasurePerimeterActive, Mode=OneWay}"
+                                      ToolTip="Measure on perimeter"
+                                      Click="MeasurePerimeter_Click">
+                            <controls:GeminiToolbarIcon Kind="MeasurePerimeter" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- 23. ComputeDirectDistanceTBItem (ImageIndex=34) -->
+                        <ToggleButton Style="{StaticResource GeminiToolbarToggleButtonStyle}"
+                                      IsChecked="{Binding IsMeasureDirectActive, Mode=OneWay}"
+                                      ToolTip="Measure distance between two points"
+                                      Click="MeasureDirect_Click">
+                            <controls:GeminiToolbarIcon Kind="MeasureDirect" Width="24" Height="24" />
+                        </ToggleButton>
+
+                        <!-- TBSeparatorItem15 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 24. TBPlay (Play piece contur + dropdown, ImageIndex=40) -->
+                        <Button x:Name="ToolbarPlayBtn"
+                                Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="Play piece contur"
+                                Click="PlayContour_Click">
+                            <controls:GeminiToolbarIcon Kind="PlayContour" Width="24" Height="24" IsDisabledLook="{Binding IsNoPieceSelected}" />
+                        </Button>
+                        <Button x:Name="ToolbarPlayDropBtn"
+                                Style="{StaticResource GeminiToolbarDropArrowButtonStyle}"
+                                ToolTip="Play options"
+                                Click="ToolbarPlayDropBtn_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Play piece contur" Click="PlayContour_Click" />
+                                    <MenuItem Header="Play grade points" Click="PlayGradePoints_Click" />
+                                    <MenuItem Header="Play Notch" Click="PlayNotch_Click" />
+                                    <MenuItem Header="Play Internal Points" Click="PlayInternalPoints_Click" />
+                                    <MenuItem Header="Play Internal Lines" Click="PlayInternalLines_Click" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+
+                        <!-- TBSeparatorItem16 -->
+                        <Border Style="{StaticResource GeminiToolbarSeparatorStyle}" />
+
+                        <!-- 25. ZoomPanel (Width=62, Height=26: "- zoom +" + TrackBarZoom) -->
+                        <Canvas Width="62" Height="26" Margin="2,0,2,0" ToolTip="Zoom">
+                            <TextBlock Canvas.Left="4" Canvas.Top="-1"
+                                       Text="-   zoom   +"
+                                       FontSize="10"
+                                       Foreground="#000000"
+                                       MouseLeftButtonDown="ZoomLabel_MouseLeftButtonDown" />
+                            <Canvas Canvas.Left="2" Canvas.Top="13" Width="56" Height="12"
+                                    Background="Transparent"
+                                    MouseLeftButtonDown="ZoomTrackBar_MouseLeftButtonDown"
+                                    MouseMove="ZoomTrackBar_MouseMove"
+                                    MouseLeftButtonUp="ZoomTrackBar_MouseLeftButtonUp">
+                                <Border Canvas.Left="2" Canvas.Top="4" Width="52" Height="3"
+                                        Background="#FFFFFF" BorderBrush="#808080" BorderThickness="1" />
+                                <Border x:Name="ZoomThumbBorder"
+                                        Canvas.Left="25" Canvas.Top="0"
+                                        Width="5" Height="11"
+                                        Background="#F0F0F0"
+                                        BorderBrush="#404040"
+                                        BorderThickness="1" />
+                            </Canvas>
+                        </Canvas>
+
+                        <!-- 26. TBCeiAsta (What is this? Context Help button, ImageIndex=48) -->
+                        <Button Style="{StaticResource GeminiToolbarButtonStyle}"
+                                ToolTip="What is this ? (Shift+F1)"
+                                Click="WhatIsThis_Click">
+                            <controls:GeminiToolbarIcon Kind="ContextHelp" Width="24" Height="24" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </StackPanel>
+
+        <!-- =================================================================== -->
+        <!-- 2. BOTTOM STATUS BAR (Height=19, 2 Panels: 600px left + right)      -->
+        <!-- =================================================================== -->
+        <Border DockPanel.Dock="Bottom"
+                Height="19"
+                Background="{StaticResource GeminiBtnFaceBrush}"
+                BorderBrush="#A0A0A0"
+                BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="600" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0"
+                        Margin="1,1,1,1"
+                        BorderBrush="#B8B8B8"
+                        BorderThickness="1">
+                    <TextBlock Text="{Binding StatusLeftText}"
+                               Margin="4,0"
+                               VerticalAlignment="Center"
+                               FontSize="11" />
+                </Border>
+                <Border Grid.Column="1"
+                        Margin="1,1,1,1"
+                        BorderBrush="#B8B8B8"
+                        BorderThickness="1">
+                    <DockPanel Margin="4,0">
+                        <TextBlock Text="{Binding ApplicationVersion}"
+                                   DockPanel.Dock="Right"
+                                   Foreground="#006B88"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   FontSize="11" />
+                        <TextBlock Text="{Binding StatusRightText}"
+                                   VerticalAlignment="Center"
+                                   FontSize="11" />
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- =================================================================== -->
+        <!-- 3. MAIN WORKSPACE: LEFT/CENTER CONVERSION+STOCK & RIGHT PROPERTIES  -->
+        <!-- =================================================================== -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="363" />
+            </Grid.ColumnDefinitions>
+
+            <!-- =============================================================== -->
+            <!-- LEFT COLUMN: CONVERSION AREA (Top) + STOCK AREA (Bottom)        -->
+            <!-- =============================================================== -->
+            <DockPanel Grid.Column="0" Background="{StaticResource GeminiBtnFaceBrush}">
+
+                <!-- Bottom Stock Area (PieceList, Height=110 matching TMainFrm_MainFrm.json) -->
+                <Border DockPanel.Dock="Bottom"
+                        Height="110"
+                        Background="#F0F0F0"
+                        BorderBrush="#A0A0A0"
+                        BorderThickness="1">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  Background="#F0F0F0">
+                        <ItemsControl ItemsSource="{Binding StockPieces}" Margin="1,1,1,1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="88"
+                                            Height="98"
+                                            Margin="0,0,1,0"
+                                            Background="#FFFFFF"
+                                            BorderBrush="#B0B0B0"
+                                            BorderThickness="1"
+                                            Cursor="Hand"
+                                            MouseLeftButtonDown="StockPieceCard_MouseLeftButtonDown">
+                                        <Canvas Width="86" Height="96">
+                                            <Path Data="{Binding ThumbnailPathData}"
+                                                  Stroke="#101010"
+                                                  StrokeThickness="1.1"
+                                                  Fill="Transparent"
+                                                  Canvas.Left="4"
+                                                  Canvas.Top="4" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       Canvas.Left="4"
+                                                       Canvas.Top="76"
+                                                       FontSize="11"
+                                                       Foreground="#000000" />
+                                        </Canvas>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Center Conversion Area (MainImage TImagine with permanent ScrollBars) -->
+                <Border Background="#35393A"
+                        BorderBrush="#A0A0A0"
+                        BorderThickness="1"
+                        MouseLeftButtonDown="CanvasEmptySpace_MouseLeftButtonDown">
+                    <ScrollViewer x:Name="WorkspaceScrollViewer"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  VerticalScrollBarVisibility="Visible"
+                                  Background="#35393A"
+                                  ScrollChanged="WorkspaceScrollViewer_ScrollChanged"
+                                  PreviewMouseWheel="WorkspaceScrollViewer_PreviewMouseWheel"
+                                  PreviewMouseDown="WorkspaceScrollViewer_PreviewMouseDown"
+                                  PreviewMouseMove="WorkspaceScrollViewer_PreviewMouseMove"
+                                  PreviewMouseUp="WorkspaceScrollViewer_PreviewMouseUp">
+
+                        <Grid x:Name="ViewportContentGrid"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Top"
+                              Background="#35393A">
+                            <Grid.LayoutTransform>
+                                <ScaleTransform x:Name="ViewportScaleTransform"
+                                                ScaleX="{Binding ZoomScale}"
+                                                ScaleY="{Binding ZoomScale}" />
+                            </Grid.LayoutTransform>
+
+                            <!-- A. Real User-Loaded Image Layer + Interactive Phase 2 Vector Overlay -->
+                            <Canvas x:Name="RealImageCanvas"
+                                    Visibility="Collapsed"
+                                    Background="#35393A">
+                                <Image x:Name="WorkspaceImageControl"
+                                       Stretch="None"
+                                       Visibility="{Binding ShowPicture, Converter={StaticResource BoolToVis}}" />
+                                <Canvas x:Name="InteractiveVectorOverlayCanvas" />
+                            </Canvas>
+
+                            <!-- B1. Live Gemini v9.0 3-Piece Reference Canvas (Matches Ảnh 1-5 1:1) -->
+                            <Canvas x:Name="LiveV9ReferenceCanvas"
+                                    Width="1536"
+                                    Height="798"
+                                    ClipToBounds="True"
+                                    Background="#35393A">
+                                <!-- Actual calibrated photograph D:\pictures\03172025 111128.jpg aligned to the 3 detected pieces -->
+                                <Image x:Name="LiveV9SamplePhotoImage"
+                                       Canvas.Left="0"
+                                       Canvas.Top="-158"
+                                       Width="1518"
+                                       Height="1160"
+                                       Stretch="Fill"
+                                       Visibility="{Binding ShowPicture, Converter={StaticResource BoolToVis}}" />
+
+                                <!-- Left vertical light-grey board margin visible in Ảnh 1 -->
+                                <Rectangle Canvas.Left="0" Canvas.Top="0" Width="28" Height="798" Fill="#CBCFC8" />
+                                <Rectangle Canvas.Left="28" Canvas.Top="0" Width="3" Height="798" Fill="#7D807C" />
+
+                                <!-- Red detected pattern contours and red corner dots matching Ảnh 1-2 -->
+                                <Canvas>
+                                    <!-- Piece 1 (Top-Left tilted rectangle) -->
+                                    <Polygon Points="225,26 509,-94 596,107 312,231"
+                                             Stroke="#E02020"
+                                             StrokeThickness="1.3"
+                                             Fill="Transparent" />
+                                    <Ellipse Canvas.Left="222" Canvas.Top="23" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="593" Canvas.Top="104" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="309" Canvas.Top="228" Width="5" Height="5" Fill="#FF1818" />
+
+                                    <!-- Piece 3 (Middle tilted rectangle) -->
+                                    <Polygon Points="586,445 816,238 961,403 730,610"
+                                             Stroke="#E02020"
+                                             StrokeThickness="1.3"
+                                             Fill="Transparent" />
+                                    <Ellipse Canvas.Left="583" Canvas.Top="442" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="813" Canvas.Top="235" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="958" Canvas.Top="400" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="727" Canvas.Top="607" Width="5" Height="5" Fill="#FF1818" />
+
+                                    <!-- Piece 2 (Bottom-Right tilted rectangle) -->
+                                    <Polygon Points="1262,441 1476,473 1424,782 1215,745"
+                                             Stroke="#E02020"
+                                             StrokeThickness="1.3"
+                                             Fill="Transparent" />
+                                    <Ellipse Canvas.Left="1259" Canvas.Top="438" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="1473" Canvas.Top="470" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="1421" Canvas.Top="779" Width="5" Height="5" Fill="#FF1818" />
+                                    <Ellipse Canvas.Left="1212" Canvas.Top="742" Width="5" Height="5" Fill="#FF1818" />
+                                </Canvas>
+                            </Canvas>
+
+                            <!-- B2. Manual 4-Piece Demo Canvas (Matches gemini_main_window.jpg 1:1) -->
+                            <Canvas x:Name="ReferenceDemoCanvas"
+                                    Width="640"
+                                    Height="520"
+                                    Visibility="Collapsed"
+                                    Background="#8E8E8E">
+
+                                <!-- Simulated Gray Digitizer Board Photo Layer -->
+                                <Canvas Visibility="{Binding ShowPicture, Converter={StaticResource BoolToVis}}">
+                                    <!-- Piece 2 (Top long curved piece) -->
+                                    <Path Data="M 134,82 L 494,97 C 504,104 510,122 522,126 L 521,154 C 380,132 230,132 95,156 L 90,128 C 118,125 130,104 134,82 Z"
+                                          Fill="#3B3A38" Stroke="#D62020" StrokeThickness="1.2" />
+
+                                    <!-- Piece 1 (Left vertical piece) -->
+                                    <Path Data="M 94,204 L 154,205 L 166,304 C 172,340 182,366 193,380 L 130,390 L 118,396 L 114,386 L 82,382 Z"
+                                          Fill="#3B3A38" Stroke="#D62020" StrokeThickness="1.2" />
+
+                                    <!-- Piece 4 (Middle tapered piece) -->
+                                    <Path Data="M 168,176 L 463,200 L 456,248 C 360,242 290,244 238,248 Z"
+                                          Fill="#3B3A38" Stroke="#D62020" StrokeThickness="1.2" />
+
+                                    <!-- Piece 3 (Bottom-right selected piece with armhole curve) -->
+                                    <Path Data="M 237,274 L 424,290 C 426,315 462,324 518,308 L 533,358 C 425,382 320,382 230,374 Z"
+                                          Fill="#3B3A38" Stroke="#E61E1E" StrokeThickness="1.4" />
+                                    <Ellipse Canvas.Left="526" Canvas.Top="353" Width="12" Height="8" Stroke="#FF0000" StrokeThickness="1.5" />
+                                </Canvas>
+
+                                <!-- Red Dashed Calibration Grid Overlay -->
+                                <Canvas x:Name="DemoGridOverlayCanvas"
+                                        Visibility="{Binding ShowGrid, Converter={StaticResource BoolToVis}}" />
+                            </Canvas>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+
+            <!-- =============================================================== -->
+            <!-- RIGHT COLUMN: MAIN PANEL (Width=363 matching TMainFrm_MainFrm)  -->
+            <!-- =============================================================== -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource GeminiBtnFaceBrush}"
+                    BorderBrush="#A0A0A0"
+                    BorderThickness="1,0,0,0">
+                <DockPanel>
+
+                    <!-- 1. ImageInfoPanel (Height=45) -->
+                    <Border DockPanel.Dock="Top"
+                            Height="45"
+                            Background="{StaticResource GeminiBtnFaceBrush}"
+                            BorderBrush="#A0A0A0"
+                            BorderThickness="1,1,1,1"
+                            Margin="1,1,1,0">
+                        <Canvas>
+                            <TextBlock Canvas.Left="5" Canvas.Top="4"
+                                       Text="{Binding DetectedPiecesText}"
+                                       Foreground="#000000" />
+                            <TextBlock Canvas.Left="5" Canvas.Top="23"
+                                       Text="{Binding PictureResolutionText}"
+                                       Foreground="#000000" />
+                        </Canvas>
+                    </Border>
+
+                    <!-- 2. ObjectPropertiesPanel (Height=131, exact runtime labels & #9B9B9B inactive boxes) -->
+                    <Border DockPanel.Dock="Top"
+                            Height="131"
+                            Background="{StaticResource GeminiBtnFaceBrush}"
+                            BorderBrush="#A0A0A0"
+                            BorderThickness="1,0,1,1"
+                            Margin="1,0,1,0">
+                        <Canvas>
+                            <TextBlock Canvas.Left="6" Canvas.Top="8" Text="Pattern name:" />
+                            <TextBox Canvas.Left="97" Canvas.Top="5" Width="250" Height="21"
+                                     Text="{Binding PieceName, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource GeminiObjectPropertyEditStyle}" />
+
+                            <TextBlock Canvas.Left="6" Canvas.Top="34" Text="Area:" />
+                            <TextBox Canvas.Left="97" Canvas.Top="30" Width="69" Height="21"
+                                     Text="{Binding PieceAreaCm2}"
+                                     Style="{StaticResource GeminiObjectPropertyEditStyle}" />
+                            <TextBlock Canvas.Left="185" Canvas.Top="34" Text="cm²" />
+
+                            <TextBlock Canvas.Left="6" Canvas.Top="58" Text="Perimeter:" />
+                            <TextBox Canvas.Left="97" Canvas.Top="54" Width="69" Height="21"
+                                     Text="{Binding PiecePerimeterCm}"
+                                     Style="{StaticResource GeminiObjectPropertyEditStyle}" />
+                            <TextBlock Canvas.Left="185" Canvas.Top="58" Text="cm" />
+
+                            <TextBlock Canvas.Left="6" Canvas.Top="83"
+                                       Width="241"
+                                       ClipToBounds="True"
+                                       Text="Graded points / Notches / Internal points / Intern" />
+                            <TextBox Canvas.Left="249" Canvas.Top="79" Width="98" Height="21"
+                                     Text="{Binding NotchesSummary}"
+                                     Style="{StaticResource GeminiObjectPropertyEditStyle}" />
+
+                            <TextBlock Canvas.Left="6" Canvas.Top="107" Text="Corners / Graded points:" />
+                            <TextBox Canvas.Left="249" Canvas.Top="103" Width="98" Height="21"
+                                     Text="{Binding CornersSummary}"
+                                     Style="{StaticResource GeminiObjectPropertyEditStyle}" />
+                        </Canvas>
+                    </Border>
+
+                    <!-- 3. PropertiesDockSite (Height=244, hosts Points / Notch / InternalPoint / InternalLine / Nothing selected) -->
+                    <Border DockPanel.Dock="Top"
+                            Height="244"
+                            Background="{StaticResource GeminiBtnFaceBrush}"
+                            BorderBrush="#A0A0A0"
+                            BorderThickness="1,0,1,1"
+                            Margin="1,0,1,0">
+                        <Grid>
+                            <!-- 3A. Nothing selected state (Matches Ảnh 1-5 1:1) -->
+                            <Grid Visibility="{Binding IsNothingSelectedDockVisible, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Nothing selected"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="#000000" />
+                            </Grid>
+
+                            <!-- 3B. TSelectedPointsPropertiesFrm (Points) -->
+                            <Canvas Visibility="{Binding IsPointsDockVisible, Converter={StaticResource BoolToVis}}">
+                                <Border Canvas.Left="2" Canvas.Top="2" Width="10" Height="10"
+                                        Background="#F0F0F0" BorderBrush="#808080" BorderThickness="1"
+                                        Cursor="Hand" MouseLeftButtonDown="ClosePropertiesDock_MouseLeftButtonDown">
+                                    <TextBlock Text="×" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
+                                </Border>
+                                <TextBlock Canvas.Left="14" Canvas.Top="0"
+                                           Text="Points"
+                                           FontWeight="Bold"
+                                           TextDecorations="Underline" />
+                                <Border Canvas.Left="58" Canvas.Top="4" Width="290" Height="2" Background="#FFFFFF" BorderBrush="#A0A0A0" BorderThickness="0,1,0,0" />
+                                <Border Canvas.Left="58" Canvas.Top="8" Width="290" Height="2" Background="#FFFFFF" BorderBrush="#A0A0A0" BorderThickness="0,1,0,0" />
+
+                                <GroupBox Header="Point type"
+                                          Canvas.Left="2" Canvas.Top="14"
+                                          Width="352" Height="36"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <RadioButton Canvas.Left="10" Canvas.Top="2"
+                                                     Content="graded point"
+                                                     IsChecked="{Binding IsGradedPoint}"
+                                                     GroupName="PtType" />
+                                        <RadioButton Canvas.Left="170" Canvas.Top="2"
+                                                     Content="curve point"
+                                                     IsChecked="{Binding IsCurvePoint}"
+                                                     GroupName="PtType" />
+                                    </Canvas>
+                                </GroupBox>
+
+                                <GroupBox Header="Modify points position"
+                                          Canvas.Left="2" Canvas.Top="51"
+                                          Width="352" Height="74"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <Button Canvas.Left="6" Canvas.Top="4" Width="88" Height="20"
+                                                Content="Move to:"
+                                                Click="MovePointTo_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                        <TextBlock Canvas.Left="104" Canvas.Top="7" Text="X =" />
+                                        <TextBox Canvas.Left="128" Canvas.Top="4" Width="50" Height="21"
+                                                 Text="{Binding PointMoveToX, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="182" Canvas.Top="7" Text="cm" />
+
+                                        <TextBlock Canvas.Left="216" Canvas.Top="7" Text="Y =" />
+                                        <TextBox Canvas.Left="240" Canvas.Top="4" Width="50" Height="21"
+                                                 Text="{Binding PointMoveToY, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="294" Canvas.Top="7" Text="cm" />
+
+                                        <Button Canvas.Left="6" Canvas.Top="31" Width="88" Height="20"
+                                                Content="Move with:"
+                                                Click="MovePointWith_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                        <TextBlock Canvas.Left="98" Canvas.Top="34" Text="dX =" />
+                                        <TextBox Canvas.Left="128" Canvas.Top="31" Width="50" Height="21"
+                                                 Text="{Binding PointMoveWithDx, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="182" Canvas.Top="34" Text="cm" />
+
+                                        <TextBlock Canvas.Left="210" Canvas.Top="34" Text="dY =" />
+                                        <TextBox Canvas.Left="240" Canvas.Top="31" Width="50" Height="21"
+                                                 Text="{Binding PointMoveWithDy, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="294" Canvas.Top="34" Text="cm" />
+                                    </Canvas>
+                                </GroupBox>
+
+                                <GroupBox Header="Properties"
+                                          Canvas.Left="2" Canvas.Top="126"
+                                          Width="352" Height="110"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <TextBlock Canvas.Left="5" Canvas.Top="4"
+                                                   Text="Tangent angle for the curve ending in this point:" />
+                                        <TextBox Canvas.Left="246" Canvas.Top="1" Width="44" Height="21"
+                                                 Text="{Binding TangentAngleEnding}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="294" Canvas.Top="4" Text="degrees" />
+
+                                        <TextBlock Canvas.Left="5" Canvas.Top="27"
+                                                   Text="Tangent angle for the curve starting in this point:" />
+                                        <TextBox Canvas.Left="246" Canvas.Top="24" Width="44" Height="21"
+                                                 Text="{Binding TangentAngleStarting}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="294" Canvas.Top="27" Text="degrees" />
+
+                                        <TextBlock Canvas.Left="5" Canvas.Top="50"
+                                                   Text="Segment or Bezier curve length:" />
+                                        <TextBox Canvas.Left="246" Canvas.Top="47" Width="44" Height="21"
+                                                 Text="{Binding SegmentBezierLength}"
+                                                 Foreground="#808080"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="294" Canvas.Top="50" Text="cm" />
+
+                                        <CheckBox Canvas.Left="5" Canvas.Top="72"
+                                                  Content="Piece origin"
+                                                  IsChecked="{Binding IsPieceOrigin}" />
+                                    </Canvas>
+                                </GroupBox>
+                            </Canvas>
+
+                            <!-- 3C. TNotchPropertiesFrm (Distance notch:) -->
+                            <Canvas Visibility="{Binding IsNotchDockVisible, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Canvas.Left="8" Canvas.Top="2"
+                                           Text="Distance notch:"
+                                           FontWeight="Bold"
+                                           TextDecorations="Underline" />
+                                <GroupBox Header="Properties:"
+                                          Canvas.Left="8" Canvas.Top="18"
+                                          Width="210" Height="214"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <TextBlock Canvas.Left="8" Canvas.Top="6" Text="X =" />
+                                        <TextBlock Canvas.Left="36" Canvas.Top="6" Text="{Binding NotchX}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="6" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="22" Text="Y =" />
+                                        <TextBlock Canvas.Left="36" Canvas.Top="22" Text="{Binding NotchY}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="22" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="38" Text="Distance:" />
+                                        <TextBox Canvas.Left="8" Canvas.Top="54" Width="121" Height="21"
+                                                 Text="{Binding NotchDistance}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="58" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="76" Text="Length:" />
+                                        <TextBox Canvas.Left="8" Canvas.Top="92" Width="121" Height="21"
+                                                 Text="{Binding NotchLength}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="96" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="114" Text="Angle:" />
+                                        <TextBox Canvas.Left="8" Canvas.Top="130" Width="121" Height="21"
+                                                 Text="{Binding NotchAngle}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="134" Text="degrees" />
+
+                                        <CheckBox Canvas.Left="8" Canvas.Top="154"
+                                                  Content="Relative angle"
+                                                  IsChecked="{Binding NotchRelativeAngle}" />
+                                        <Button Canvas.Left="8" Canvas.Top="172" Width="121" Height="23"
+                                                Content="Apply"
+                                                Click="ApplyNotch_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                    </Canvas>
+                                </GroupBox>
+                            </Canvas>
+
+                            <!-- 3D. TInternalPointPropertiesFrm (Internal point:) -->
+                            <Canvas Visibility="{Binding IsInternalPointDockVisible, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Canvas.Left="8" Canvas.Top="2"
+                                           Text="Internal point:"
+                                           FontWeight="Bold"
+                                           TextDecorations="Underline" />
+                                <GroupBox Header="Properties:"
+                                          Canvas.Left="8" Canvas.Top="18"
+                                          Width="190" Height="132"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <TextBlock Canvas.Left="8" Canvas.Top="10" Text="X =" />
+                                        <TextBox Canvas.Left="64" Canvas.Top="6" Width="57" Height="21"
+                                                 Text="{Binding InternalPointX, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="128" Canvas.Top="10" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="34" Text="Y =" />
+                                        <TextBox Canvas.Left="64" Canvas.Top="30" Width="57" Height="21"
+                                                 Text="{Binding InternalPointY, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="128" Canvas.Top="34" Text="mm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="58" Text="Length:" />
+                                        <TextBox Canvas.Left="64" Canvas.Top="54" Width="57" Height="21"
+                                                 Text="{Binding InternalPointLength, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="128" Canvas.Top="58" Text="mm" />
+
+                                        <Button Canvas.Left="8" Canvas.Top="80" Width="113" Height="24"
+                                                Content="Apply"
+                                                Click="ApplyInternalPoint_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                    </Canvas>
+                                </GroupBox>
+                            </Canvas>
+
+                            <!-- 3E. TInternalLinePropertiesFrm (Internal line type:) -->
+                            <Canvas Visibility="{Binding IsInternalLineDockVisible, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Canvas.Left="8" Canvas.Top="2"
+                                           Text="Internal line type:"
+                                           FontWeight="Bold"
+                                           TextDecorations="Underline" />
+                                <ComboBox Canvas.Left="8" Canvas.Top="18" Width="193" Height="21"
+                                          SelectedIndex="{Binding InternalLineTypeIndex}">
+                                    <ComboBoxItem Content="Simple line" />
+                                    <ComboBoxItem Content="For cutting" />
+                                    <ComboBoxItem Content="Grain axis" />
+                                    <ComboBoxItem Content="Simetry axis" />
+                                </ComboBox>
+                                <GroupBox Header="Propreties:"
+                                          Canvas.Left="8" Canvas.Top="42"
+                                          Width="193" Height="177"
+                                          BorderBrush="#A0A0A0">
+                                    <Canvas>
+                                        <TextBlock Canvas.Left="8" Canvas.Top="10" Text="X =" />
+                                        <TextBox Canvas.Left="88" Canvas.Top="6" Width="49" Height="21"
+                                                 Text="{Binding InternalLineX, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="10" Text="cm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="34" Text="Y =" />
+                                        <TextBox Canvas.Left="88" Canvas.Top="30" Width="49" Height="21"
+                                                 Text="{Binding InternalLineY, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="34" Text="cm" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="58" Text="Angle:" />
+                                        <TextBox Canvas.Left="88" Canvas.Top="54" Width="49" Height="21"
+                                                 Text="{Binding InternalLineAngle, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="58" Text="degrees" />
+
+                                        <TextBlock Canvas.Left="8" Canvas.Top="82" Text="Length:" />
+                                        <TextBox Canvas.Left="88" Canvas.Top="78" Width="49" Height="21"
+                                                 Text="{Binding InternalLineLength, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource GeminiClassicTextBoxStyle}" />
+                                        <TextBlock Canvas.Left="144" Canvas.Top="82" Text="cm" />
+
+                                        <Button Canvas.Left="8" Canvas.Top="104" Width="129" Height="23"
+                                                Content="Apply"
+                                                Click="ApplyInternalLine_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                        <Button Canvas.Left="8" Canvas.Top="132" Width="129" Height="23"
+                                                Content="Flip"
+                                                Click="FlipInternalLine_Click"
+                                                Style="{StaticResource GeminiClassicButtonStyle}" />
+                                    </Canvas>
+                                </GroupBox>
+                            </Canvas>
+                        </Grid>
+                    </Border>
+
+                    <!-- 5. ProgressBarPanel (Docked at bottom of Right Panel, Height=25 matching Ảnh 1-5) -->
+                    <Border DockPanel.Dock="Bottom"
+                            Height="25"
+                            Background="{StaticResource GeminiBtnFaceBrush}"
+                            BorderBrush="#A0A0A0"
+                            BorderThickness="1,0,1,1"
+                            Margin="1,0,1,0" />
+
+                    <!-- 4. ZoomAreaImagine (Magnifier / Loupe, star-sized to fill remaining height) -->
+                    <Border Background="#383B39"
+                            BorderBrush="#A0A0A0"
+                            BorderThickness="1,0,1,1"
+                            Margin="1,0,1,0"
+                            ClipToBounds="True">
+                        <Grid>
+                            <!-- Idle dark board texture matching Ảnh 1-5 -->
+                            <Image x:Name="MagnifierIdleBoardImage"
+                                   Stretch="Fill" />
+
+                            <!-- 4-Piece Manual Demo corner wedge -->
+                            <Canvas x:Name="MagnifierDemoCornerCanvas"
+                                    Visibility="Collapsed"
+                                    Background="#969696">
+                                <Path x:Name="MagnifierDemoCornerPath"
+                                      Data="M 0,0 L 146,0 L 192,162 L 0,218 Z"
+                                      Fill="#585858"
+                                      Stroke="#000000"
+                                      StrokeThickness="3.2" />
+                                <Line x:Name="MagCross1" X1="180" Y1="150" X2="200" Y2="170" Stroke="#FF0000" StrokeThickness="2.8" />
+                                <Line x:Name="MagCross2" X1="200" Y1="150" X2="180" Y2="170" Stroke="#FF0000" StrokeThickness="2.8" />
+                            </Canvas>
+
+                            <!-- Live zoomed image brush when user moves mouse over a loaded image -->
+                            <Rectangle x:Name="MagnifierLiveRect"
+                                       Visibility="Collapsed" />
+
+                            <!-- Top-right "+" and "-" buttons (19x16 each, matching TMainFrm ZoomIn / ZoomOut) -->
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="0,3,4,0">
+                                <Button Width="19" Height="16"
+                                        Margin="0,0,4,0"
+                                        Padding="0"
+                                        Content="+"
+                                        FontSize="10"
+                                        FontWeight="Bold"
+                                        Style="{StaticResource GeminiClassicButtonStyle}"
+                                        ToolTip="Magnifier Zoom In"
+                                        Click="MagnifierZoomIn_Click" />
+                                <Button Width="19" Height="16"
+                                        Padding="0"
+                                        Content="-"
+                                        FontSize="10"
+                                        FontWeight="Bold"
+                                        Style="{StaticResource GeminiClassicButtonStyle}"
+                                        ToolTip="Magnifier Zoom Out"
+                                        Click="MagnifierZoomOut_Click" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

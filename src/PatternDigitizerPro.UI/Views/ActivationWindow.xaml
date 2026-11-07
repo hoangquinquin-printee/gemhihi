@@ -1,0 +1,13 @@
+<Window x:Class="PatternDigitizerPro.UI.Views.ActivationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="gemhihi Activation" Height="390" Width="560" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="22">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#063B65" Text="gemhihi" />
+        <TextBlock Grid.Row="1" Margin="0,8,0,10" TextWrapping="Wrap" Text="This copy requires a signed, time-limited license. Send the Machine ID below to the license issuer, then paste the received license file contents." />
+        <StackPanel Grid.Row="2"><TextBlock FontWeight="Bold" Text="Machine ID"/><DockPanel Margin="0,4,0,12"><Button DockPanel.Dock="Right" Width="78" Margin="8,0,0,0" Content="Copy" Click="CopyMachineId_Click"/><TextBox x:Name="MachineIdBox" IsReadOnly="True"/></DockPanel></StackPanel>
+        <StackPanel Grid.Row="3"><TextBlock FontWeight="Bold" Text="License text (.hphoto-license)"/><TextBox x:Name="LicenseBox" Margin="0,4,0,0" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/></StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0"><Button Width="105" Content="Activate" IsDefault="True" Click="Activate_Click"/><Button Width="90" Margin="8,0,0,0" Content="Exit" IsCancel="True" Click="Exit_Click"/></StackPanel>
+    </Grid>
+</Window>

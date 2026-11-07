@@ -1,0 +1,1 @@
+{"version":"2.6","ok":true,"command":"session","data":{"activation":{"environment":"AGENT_DESKTOP_SESSION","value":"run-1793966273329-23160-0"},"artifacts":"full","created_at":1793966273333,"name":"gemini-rea-observation","next":"$env:AGENT_DESKTOP_SESSION = 'run-1793966273329-23160-0'","session_id":"run-1793966273329-23160-0","trace":"on"}}
