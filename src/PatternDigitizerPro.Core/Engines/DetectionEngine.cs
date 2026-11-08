@@ -555,7 +555,12 @@ public sealed class DetectionEngine
         // anchors; the fitted Bézier between anchors retains smooth garment
         // curves.  A low tolerance exposed pin rims, paper fibres and mask
         // staircase noise as editable points.
-        double rdpToleranceMm = Math.Clamp(perimeterEstMm * 0.0040, 2.0, 7.5);
+        // Gemini keeps only structural anchors on neutral paper: compression
+        // stair-steps, paper fibres and magnet shadows are not editable points.
+        // The previous 0.4% tolerance left those artefacts as extra corners on
+        // phone photos.  Use a slightly stronger scale-aware tolerance while
+        // retaining the fitted Bézier residual checks below.
+        double rdpToleranceMm = Math.Clamp(perimeterEstMm * 0.0060, 3.0, 9.0);
         List<int> keyIndices = SimplifyClosedContourIndices(boundaryMm, rdpToleranceMm);
 
         // 2. Merge adjacent smooth curve spans across non-corner intermediate vertices (where local tangent discontinuity < 22 deg)
