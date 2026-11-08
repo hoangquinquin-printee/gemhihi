@@ -168,6 +168,22 @@ public sealed class DetectionEngine
                     score = Math.Clamp(lumDiffGlobal * 1.35, 0, 255);
                     isForeground = true;
                 }
+                else if (hasExplicitDigitizeFrame &&
+                         localBgLum >= 175.0 &&
+                         lum <= localBgLum - 28.0 &&
+                         colorDist >= 42.0 &&
+                         Math.Abs(r - g) <= 75.0 &&
+                         Math.Abs(g - b) <= 95.0)
+                {
+                    // Neutral brown/cardboard patterns are darker than a white
+                    // photo background.  Gemini still traces these pieces when
+                    // a digitize frame is active; treating only the local
+                    // contrast as foreground avoids turning dark tools into a
+                    // full-photo candidate.  Component validation below rejects
+                    // the detached tool/magnet blobs.
+                    score = Math.Clamp((localBgLum - lum) * 1.6, 0, 255);
+                    isForeground = true;
+                }
                 else if (colorDist >= 78.0 && lumDiffLocal >= 48.0 && Math.Abs(r - b) >= 28)
                 {
                     // Medium-bright colored pattern material
