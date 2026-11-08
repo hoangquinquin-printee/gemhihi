@@ -10,9 +10,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\gemhihi.ico</ApplicationIcon>
     <Product>gemhihi</Product>
-    <Version>1.0.29</Version>
-    <AssemblyVersion>1.0.29.0</AssemblyVersion>
-    <FileVersion>1.0.29.0</FileVersion>
+    <Version>1.0.30</Version>
+    <AssemblyVersion>1.0.30.0</AssemblyVersion>
+    <FileVersion>1.0.30.0</FileVersion>
     <!-- Deliver a Windows x64 runtime with the application: customer PCs do
          not need a separately installed .NET Desktop Runtime. -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

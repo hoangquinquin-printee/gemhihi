@@ -172,8 +172,13 @@ public sealed class DetectionEngine
                          localBgLum >= 175.0 &&
                          lum <= localBgLum - 28.0 &&
                          colorDist >= 42.0 &&
-                         Math.Abs(r - g) <= 75.0 &&
-                         Math.Abs(g - b) <= 95.0)
+                         // A framed brown/cardboard piece has a warm ordered
+                         // channel profile (R > G > B).  Do not classify
+                         // neutral grey tools, magnets, or dark shadows as a
+                         // second pattern merely because they are darker than
+                         // the white background.
+                         r >= g + 18.0 &&
+                         g >= b + 18.0)
                 {
                     // Neutral brown/cardboard patterns are darker than a white
                     // photo background.  Gemini still traces these pieces when
