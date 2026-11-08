@@ -1,5 +1,5 @@
 #define AppName "gemhihi"
-#define AppVersion "1.0.30"
+#define AppVersion "1.0.31"
 #define AppPublisher "gemhihi"
 #define AppExeName "gemhihi.exe"
 
@@ -11,7 +11,7 @@ AppPublisher={#AppPublisher}
 DefaultDirName={autopf}\gemhihi
 DefaultGroupName={#AppName}
 OutputDir=..\artifacts\installer
-OutputBaseFilename=gemhihi-Setup-1.0.30
+OutputBaseFilename=gemhihi-Setup-1.0.31
 SetupIconFile=..\src\PatternDigitizerPro.UI\Assets\gemhihi.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -21,7 +21,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\{#AppExeName}
 
 [Files]
-Source: "..\artifacts\release\gemhihi-1.0.30\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "*.pdb"
+Source: "..\artifacts\release\gemhihi-1.0.31\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "*.pdb"
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"

@@ -189,6 +189,20 @@ public sealed class DetectionEngine
                     score = Math.Clamp((localBgLum - lum) * 1.6, 0, 255);
                     isForeground = true;
                 }
+                else if (hasExplicitDigitizeFrame &&
+                         // When the user frame is mostly covered by the
+                         // cardboard itself, local background samples are
+                         // also cardboard and local contrast collapses.
+                         // Preserve the warm material signature as the frame
+                         // prior; neutral tools and magnets do not satisfy it.
+                         r >= g + 18.0 &&
+                         g >= b + 18.0 &&
+                         colorDist >= 25.0 &&
+                         lum >= 70.0 && lum <= 205.0)
+                {
+                    score = Math.Clamp(colorDist * 2.0, 0, 255);
+                    isForeground = true;
+                }
                 else if (colorDist >= 78.0 && lumDiffLocal >= 48.0 && Math.Abs(r - b) >= 28)
                 {
                     // Medium-bright colored pattern material
